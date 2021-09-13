@@ -1,0 +1,239 @@
+﻿@page "/"
+@page "/pages/authentication/login"
+@layout LoginLayout
+@inject Providers.TokenAuthenticationStateProvider TokenAuthenticationStateProvider
+@inject HttpClient HttpClient
+
+@inject NavigationManager NavigationManager
+
+
+@using System.ComponentModel.DataAnnotations
+
+
+
+<br /><br /><br />
+@if (showErrorAlert)
+{
+    <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="(() => CloseMe(true))">Invalid username or password!</MudAlert>
+}
+
+<MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+    <MudText Typo="Typo.h4" GutterBottom="true">Sign In</MudText>
+
+    <MudText>Don't have an account? <MudLink Href="/pages/authentication/register">Sign Up</MudLink></MudText>
+
+    <MudTextField T="string" @bind-Value="@Email" Required="true" Label="E-mail" Variant="Variant.Outlined" Class="my-6"></MudTextField>
+
+    <MudTextField @bind-Value="@Password" Label="Password" Required="true" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="TogglePasswordVisibility" />
+
+    <div Class="d-flex justify-space-between align-center">
+        <MudCheckBox T="bool" Label="Remember me?" @bind-Checked="RememberMe" Color="Color.Primary" Class="ml-n1 my-3"></MudCheckBox>
+        <MudSpacer />
+        <br />
+        <br />
+        <MudLink Href="/pages/authentication/forgot-password">Forgot pwd?</MudLink>
+    </div>
+
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary"  Disabled="@(!success && !isBusy)"  Size="Size.Large" FullWidth="true" OnClick="() => HandleSubmit()">Sign In</MudButton>
+
+</MudForm>
+
+
+
+
+@*<div style="max-width: 400px;">
+        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Email" HelperText="Email"
+                                  @bind-Value="model.Email" For="@(() => model.Email)" />
+                    <MudTextField Label="Password" Class="mt-3"
+                                  @bind-Value="model.Password" For="@(() => model.Password)" />
+
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Login</MudButton>
+                </MudCardActions>
+            </MudCard>
+            <MudText Typo="Typo.body2" Align="Align.Center" Class="my-4">
+                Fill out the form correctly to see the success message.
+            </MudText>
+
+            <MudExpansionPanels>
+                <MudExpansionPanel Text="Show Validation Summary">
+                    @if (success)
+                    {
+                        <MudText Color="Color.Success">Success</MudText>
+                    }
+                    else
+                    {
+                        <MudText Color="@Color.Error">
+                            <ValidationSummary />
+                        </MudText>
+                    }
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+        </EditForm>
+    </div>*@
+
+@code {
+    private bool showCallAlert = false;
+    private bool showErrorAlert = false;
+
+    string Password { get; set; } = default;
+    string Email { get; set; } = default;
+    bool RememberMe { get; set; } = default;
+
+    bool isBusy = default;
+
+    LoginModel model = new LoginModel();
+    bool success;
+
+    string[] errors = { };
+    MudTextField<string> pwField1;
+    MudForm form;
+
+    public class RegisterAccountForm
+    {
+        [Required]
+        [StringLength(8, ErrorMessage = "Name length can't be more than 8.")]
+        public string Username { get; set; }
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required]
+        [StringLength(30, ErrorMessage = "Password must be at least 8 characters long.", MinimumLength = 8)]
+        public string Password { get; set; }
+
+        [Required]
+        [Compare(nameof(Password))]
+        public string Password2 { get; set; }
+
+    }
+
+
+    private async Task HandleSubmit()
+    {
+        isBusy = false;
+        success = false;
+        model = new LoginModel
+        {
+            Email = Email,
+            Password = Password,
+            RememberMe = RememberMe
+        };
+
+
+        var response = await HttpClient.PostAsJsonAsync("api/account/login", model);
+        var loginResult = await response.Content.ReadFromJsonAsync<LoginResult>();
+        if (loginResult.Successful)
+        {
+            await TokenAuthenticationStateProvider.Login(loginResult.Token);
+            NavigationManager.NavigateTo("/personal/dashboard");
+        }
+        else
+        {
+            showErrorAlert = true;
+            Console.WriteLine("Invalid username or password");
+        }
+
+    }
+
+    private async Task OnValidSubmit(EditContext context)
+    {
+        //success = true;
+        //StateHasChanged();
+
+
+
+        var response = await HttpClient.PostAsJsonAsync("api/account/login", model);
+        var loginResult = await response.Content.ReadFromJsonAsync<LoginResult>();
+        if (loginResult.Successful)
+        {
+            await TokenAuthenticationStateProvider.Login(loginResult.Token);
+            NavigationManager.NavigateTo("/personal/dashboard");
+        }
+        else
+        {
+            showErrorAlert = true;
+        }
+
+    }
+
+    bool PasswordVisibility;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    void TogglePasswordVisibility()
+    {
+        @if (PasswordVisibility)
+        {
+            PasswordVisibility = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            PasswordVisibility = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+    private void CloseMe(bool value)
+    {
+        if (value)
+        {
+            showErrorAlert = false;
+        }
+        else
+        {
+            showCallAlert = false;
+        }
+    }
+
+}
+
+@*<MudText Typo="Typo.h4" GutterBottom="true">Sign In</MudText>
+
+    <MudText>Don't have an account? <MudLink Href="/pages/authentication/register">Sign Up</MudLink></MudText>
+
+    <MudTextField T="string" Value="@("staff@mudblazor.com")" Label="E-mail" Variant="Variant.Outlined" Class="my-6"></MudTextField>
+
+    <MudTextField @bind-Value="@Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="TogglePasswordVisibility" />
+
+    <div Class="d-flex justify-space-between align-center">
+        <MudCheckBox T="bool" Label="Remember me?" Color="Color.Primary" Class="ml-n1 my-3"></MudCheckBox>
+        <MudLink Href="/pages/authentication/forgot-password">Forgot pwd?</MudLink>
+    </div>
+
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Link="/personal/dashboard" Size="Size.Large" FullWidth="true">Sign In</MudButton>
+
+    @code {
+        string Password { get; set; } = "BMWvBPJXZu";
+
+        bool PasswordVisibility;
+        InputType PasswordInput = InputType.Password;
+        string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+        void TogglePasswordVisibility()
+        {
+            @if (PasswordVisibility)
+            {
+                PasswordVisibility = false;
+                PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+                PasswordInput = InputType.Password;
+            }
+            else
+            {
+                PasswordVisibility = true;
+                PasswordInputIcon = Icons.Material.Filled.Visibility;
+                PasswordInput = InputType.Text;
+            }
+        }
+    }*@

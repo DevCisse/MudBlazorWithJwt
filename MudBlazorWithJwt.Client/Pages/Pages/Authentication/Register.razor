@@ -1,0 +1,135 @@
+﻿@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@page "/pages/authentication/register"
+@layout LoginLayout
+@inject Providers.TokenAuthenticationStateProvider TokenAuthenticationStateProvider
+@inject HttpClient HttpClient
+
+@inject NavigationManager NavigationManager
+
+
+
+<MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+
+    <MudText Typo="Typo.h4" GutterBottom="true">Sign Up</MudText>
+    <MudText>Already have an account? <MudLink Href="/pages/authentication/login">Sign In</MudLink></MudText>
+
+    <MudTextField T="string" @bind-Value="Email" Required="true" RequiredError="Email is required!" Label="E-mail" Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" Variant=" Variant.Outlined"></MudTextField>
+
+    @*<MudTextField @bind-Value="@Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="TogglePasswordVisibility" Class="mt-4" />
+
+        <MudTextField @bind-Value="@Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="TogglePasswordVisibility" Class="mt-4" />*@
+
+    <MudTextField T="string" Label="Password" @bind-Value="Password" Variant="Variant.Outlined" @ref="pwField1"
+                  InputType="InputType.Password"
+                  Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
+                  RequiredError="Password is required!" Class="mt-4" />
+    <MudTextField T="string"
+                  Label="Enter password again" @bind-Value="ConfirmPassword" Variant="Variant.Outlined" InputType="InputType.Password"
+                  Validation="@(new Func<string, string>(PasswordMatch))" Class="mt-4" />
+
+
+    @*<MudCheckBox @bind-Checked="@AgreeToTerms" Label="I agree to the terms and privacy" Color="Color.Primary" Class="ml-n1 my-3"></MudCheckBox>*@
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success && !isBusy)" OnClick="() => HandleSubmit()" Size="Size.Large" FullWidth="true" Class="mt-4">Register</MudButton>
+</MudForm>
+
+@code {
+
+    bool success = default;
+    bool isBusy = default;
+    string Password { get; set; }
+    string Email { get; set; }
+    string ConfirmPassword { get; set; }
+    public bool AgreeToTerms { get; set; }
+
+
+    private RegisterModel model = new RegisterModel();
+
+    string[] errors = { };
+    MudForm form;
+
+    bool PasswordVisibility;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    MudTextField<string> pwField1;
+
+    void TogglePasswordVisibility()
+    {
+        @if (PasswordVisibility)
+        {
+            PasswordVisibility = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            PasswordVisibility = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+    private IEnumerable<string> PasswordStrength(string pw)
+    {
+        if (string.IsNullOrWhiteSpace(pw))
+        {
+            yield return "Password is required!";
+            yield break;
+        }
+        if (pw.Length < 8)
+            yield return "Password must be at least of length 8";
+        if (!Regex.IsMatch(pw, @"[A-Z]"))
+            yield return "Password must contain at least one capital letter";
+        if (!Regex.IsMatch(pw, @"[a-z]"))
+            yield return "Password must contain at least one lowercase letter";
+        if (!Regex.IsMatch(pw, @"[0-9]"))
+            yield return "Password must contain at least one digit";
+    }
+
+    private string PasswordMatch(string arg)
+    {
+        if (pwField1.Value != arg)
+            return "Passwords don't match";
+        return null;
+    }
+
+    async Task HandleSubmit()
+    {
+        isBusy = false;
+        success = false;
+
+        model = new RegisterModel
+        {
+            Email = Email,
+            Password = Password,
+            ConfirmPassword = ConfirmPassword
+
+
+        };
+
+        var response = await HttpClient.PostAsJsonAsync("api/account/register/", model);
+
+        var registerResult =await response.Content.ReadFromJsonAsync<RegisterResult>();
+
+
+        if (registerResult.Successful)
+        {
+            NavigationManager.NavigateTo("pages/authentication/login");
+
+        }
+        else
+        {
+            foreach (var item in registerResult.Errors)
+            {
+                Console.WriteLine(item);
+            }
+        }
+
+
+
+    }
+
+
+}
+
