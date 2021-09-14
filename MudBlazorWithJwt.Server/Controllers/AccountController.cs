@@ -23,7 +23,7 @@ namespace MudBlazorWithJwt.Server.Controllers
 
     //[ApiConventionType(typeof(DefaultApiConventions))]
     [Produces(MediaTypeNames.Application.Json)]
-    [Consumes(MediaTypeNames.Application.Json)]
+    //[Consumes(MediaTypeNames.)]
     public class AccountController : ControllerBase
     {
         private static UserModel LoggedOutUser = new UserModel { IsAuthenticated = false };
@@ -42,12 +42,12 @@ namespace MudBlazorWithJwt.Server.Controllers
 
         [HttpPost("Register")]
         [ProducesDefaultResponseType]
-        [ProducesResponseType(typeof(RegisterResult),StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(RegisterResult),StatusCodes.Status400BadRequest)]
-     
+        [ProducesResponseType(typeof(RegisterResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(RegisterResult), StatusCodes.Status400BadRequest)]
+
         public async Task<ActionResult<RegisterResult>> Post([FromBody] RegisterModel model)
         {
-            var newUser = new ApplicationUser { UserName = model.Email, Email = model.Email,FirstName = model.FirstName,LastName = model.LastName,JobTitle = model.JobTitle };
+            var newUser = new ApplicationUser { UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName, JobTitle = model.JobTitle };
 
             var result = await _userManager.CreateAsync(newUser, model.Password);
 
@@ -106,7 +106,7 @@ namespace MudBlazorWithJwt.Server.Controllers
         public async Task<IActionResult> Patch([FromBody] UpdateModel update)
         {
             var user = await _userManager.FindByEmailAsync(update.Email);
-            if(user is null)
+            if (user is null)
             {
                 return BadRequest("error");
             }
@@ -118,20 +118,22 @@ namespace MudBlazorWithJwt.Server.Controllers
 
             await _userManager.UpdateAsync(user);
             return Ok();
-            
+
         }
 
 
 
-        [HttpGet("userdetails/{email}")]
         [Authorize]
-        
+        [HttpGet("userdetails/{email}")]
+        [ProducesResponseType(typeof(UserDetails),StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<UserDetails>> UserDetails(string email)
         {
-            var user  = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(email);
 
-            if(user is null)
-            {                return NotFound("user not found");
+            if (user is null)
+            {
+                return NotFound("user not found");
             }
 
             UserDetails details = new UserDetails

@@ -194,7 +194,11 @@
         Console.WriteLine("we got the name " + name);
 
         userDetails = await HttpClient.GetFromJsonAsync<UserDetails>($"api/account/userdetails/{name}");
-        
+
+        //var test =  await HttpClient.GetAsync($"api/account/userdetails/{name}");
+        // var read = await test.Content.ReadFromJsonAsync<UserDetails>();
+        // Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(read));
+
 
     }
 
