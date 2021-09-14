@@ -17,7 +17,7 @@
     <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="(() => CloseMe(true))" >Invalid username or password!</MudAlert>
 }
 
-<MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors" >
+<MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
     <MudText Typo="Typo.h4" GutterBottom="true" Class="mt-4">Sign In</MudText>
 
     <MudText>Don't have an account? <MudLink Href="/pages/authentication/register">Sign Up</MudLink></MudText>
@@ -35,7 +35,9 @@
     </div>
 
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary"  Disabled="@(!success && !isBusy)"  Size="Size.Large" FullWidth="true" OnClick="() => HandleSubmit()">Sign In</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success && !isBusy)" Size="Size.Large" FullWidth="true" OnClick="() => HandleSubmit()">Sign In</MudButton>
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="isGuest"  Size="Size.Large" FullWidth="true" OnClick="() => HandleGuest()" Class="mt-4">Sign In As Guest</MudButton>
 
 </MudForm>
 
@@ -82,6 +84,7 @@
     private bool showCallAlert = false;
     private bool showErrorAlert = false;
 
+    private bool isGuest = default;
     string Password { get; set; } = default;
     string Email { get; set; } = default;
     bool RememberMe { get; set; } = default;
@@ -115,6 +118,34 @@
 
     }
 
+    private async Task HandleGuest()
+    {
+
+        isBusy = false;
+        success = false;
+
+        isGuest = true;
+        model = new LoginModel
+        {
+            Email = "cisse@yahoo.com",
+            Password = "Test@123",
+            RememberMe = true
+        };
+
+        var response = await HttpClient.PostAsJsonAsync("api/account/login", model);
+        var loginResult = await response.Content.ReadFromJsonAsync<LoginResult>();
+        if (loginResult.Successful)
+        {
+            await TokenAuthenticationStateProvider.Login(loginResult.Token);
+            NavigationManager.NavigateTo("/personal/dashboard");
+        }
+        else
+        {
+            showErrorAlert = true;
+            Console.WriteLine("Invalid username or password");
+        }
+
+    }
 
     private async Task HandleSubmit()
     {

@@ -1,4 +1,9 @@
-﻿<AuthorizeView>
+﻿@inject HttpClient HttpClient
+
+@*@inject AuthenticationStateProvider GetAuthenticationStateAsync
+@attribute [Authorize]*@
+
+<AuthorizeView>
     <MudCard Elevation="0" Square="true" Class="@Class" Style="@Style">
         <MudCardHeader>
             <CardHeaderAvatar>
@@ -16,4 +21,10 @@
 @code {
     [Parameter] public string Class { get; set; }
     [Parameter] public string Style { get; set; }
+
+
+
+    private UserDetails userDetails = new UserDetails();
+
+ 
 }
