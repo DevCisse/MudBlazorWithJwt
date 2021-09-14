@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
-
-
+@inject Providers.TokenAuthenticationStateProvider TokenAuthenticationStateProvider
+@inject NavigationManager NavigationManager
 <MudThemeProvider Theme="_themeManager.Theme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -37,7 +37,7 @@
                 <PersonCard Class="mt-n2" />
                 <MudDivider Class="mb-2" />
                 <MudListItem Text="Account" Icon="@Icons.Material.Outlined.Person" Href="/personal/account" />
-                <MudListItem Text="Logout" Icon="@Icons.Material.Outlined.Login" Href="/pages/authentication/login" />
+                <MudListItem Text="Logout" Icon="@Icons.Material.Outlined.Login" OnClick="Logout" Href="/pages/authentication/login" />
             </ChildContent>
         </MudMenu>
     </MudAppBar>
@@ -96,6 +96,13 @@
     protected override void OnInitialized()
     {
         StateHasChanged();
+    }
+
+
+    async Task Logout()
+    {
+        await TokenAuthenticationStateProvider.Logout();
+        NavigationManager.NavigateTo("pages/authentication/login");
     }
 
     private List<BreadcrumbItem> _items = new List<BreadcrumbItem>

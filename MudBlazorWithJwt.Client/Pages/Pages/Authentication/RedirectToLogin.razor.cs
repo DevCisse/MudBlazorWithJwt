@@ -14,7 +14,9 @@ namespace MudBlazorWithJwt.Client.Pages.Pages.Authentication
 
         protected override void OnInitialized()
         {
-            NavigationManager.NavigateTo("pages/authentication/login");
+             NavigationManager.NavigateTo("pages/authentication/login");
+           // NavigationManager. NavigateTo(
+            // $"authentication/login?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@*@page "/"*@
 @page "/pages/authentication/login"
 @layout LoginLayout
 @inject Providers.TokenAuthenticationStateProvider TokenAuthenticationStateProvider
@@ -14,11 +14,11 @@
 <br /><br /><br />
 @if (showErrorAlert)
 {
-    <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="(() => CloseMe(true))">Invalid username or password!</MudAlert>
+    <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="(() => CloseMe(true))" >Invalid username or password!</MudAlert>
 }
 
-<MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
-    <MudText Typo="Typo.h4" GutterBottom="true">Sign In</MudText>
+<MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors" >
+    <MudText Typo="Typo.h4" GutterBottom="true" Class="mt-4">Sign In</MudText>
 
     <MudText>Don't have an account? <MudLink Href="/pages/authentication/register">Sign Up</MudLink></MudText>
 
