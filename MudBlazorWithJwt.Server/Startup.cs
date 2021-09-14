@@ -40,7 +40,7 @@ namespace MudBlazorWithJwt.Server
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                //c.SwaggerDoc("v1", new OpenApiInfo { Title = "MudBlazorWithJwt.Server", Version = "v1" });
+                
 
 
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -66,13 +66,9 @@ namespace MudBlazorWithJwt.Server
                 c.EnableAnnotations();
 
 
-
-              /*  c.OperationFilter<AddHeaderOperationFilter>("correlationId", "Correlation Id for the request", false);*/ // adds any string you like to the request headers - in this case, a correlation id
                 c.OperationFilter<AddResponseHeadersFilter>(); // [SwaggerResponseHeader]
 
-                //var filePath = Path.Combine(AppContext.BaseDirectory, "WebApi.xml");
-                //c.IncludeXmlComments(filePath); // standard Swashbuckle functionality, this needs to be before c.OperationFilter<AppendAuthorizeToSummaryOperationFilter>()
-
+                
                 c.OperationFilter<AppendAuthorizeToSummaryOperationFilter>(); // Adds "(Auth)" to the summary so that you can see which endpoints have Authorization
                                                                              
                 #region
