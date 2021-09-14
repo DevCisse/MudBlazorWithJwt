@@ -5,8 +5,9 @@ namespace MudBlazorWithJwt.Shared
     public class RegisterModel
     {
         [Required]
-        [EmailAddress]
+        [EmailAddress(ErrorMessage ="The value is not valid email address")]
         [Display(Name = "Email")]
+
         public string Email { get; set; }
 
         [Required]
@@ -19,5 +20,10 @@ namespace MudBlazorWithJwt.Shared
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string JobTitle { get; set; }
     }
 }

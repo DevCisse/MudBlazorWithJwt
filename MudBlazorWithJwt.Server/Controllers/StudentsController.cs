@@ -8,12 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MudBlazorWithJwt.Server.Data;
 using MudBlazorWithJwt.Shared;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace MudBlazorWithJwt.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class StudentsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -31,8 +31,14 @@ namespace MudBlazorWithJwt.Server.Controllers
         }
 
         // GET: api/Students/5
+        /// <summary>
+        /// returns a unique student
+        /// </summary>
+        /// <param name="id">id of the student</param>
+        /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Student>> GetStudent(int id)
+
+        public async Task<ActionResult<Student>> GetStudent([SwaggerParameter("id of the student ")]int id)
         {
             var student = await _context.Student.FindAsync(id);
 
@@ -78,6 +84,15 @@ namespace MudBlazorWithJwt.Server.Controllers
         // POST: api/Students
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [SwaggerOperation(
+    Summary = "Creates a new student",
+    Description = "Requires admin privileges",
+    OperationId = "CreateStudent",
+    Tags = new[] {  "Students" })]
+
+        [SwaggerResponse(201, "The product was created", typeof(Student), ContentTypes = new[] { "application/json"})]
+        [SwaggerResponse(400, "The product data is invalid")]
+        
         public async Task<ActionResult<Student>> PostStudent(Student student)
         {
             _context.Student.Add(student);

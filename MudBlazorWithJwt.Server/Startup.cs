@@ -13,9 +13,12 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MudBlazorWithJwt.Server.Data;
 using MudBlazorWithJwt.Server.Models;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,9 +40,72 @@ namespace MudBlazorWithJwt.Server
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "MudBlazorWithJwt.Server", Version = "v1" });
+                //c.SwaggerDoc("v1", new OpenApiInfo { Title = "MudBlazorWithJwt.Server", Version = "v1" });
+
+
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "MudBlazorWithJwt.Server",
+                    Description = "An ASP.NET Core API app for MudBlazor",
+                    //TermsOfService = new Uri("https://example.com/terms"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Hassan Salihu",
+                        Email = "devcisse@outlook.com",
+                        Url = new Uri("https://devcisse.com/DevCisse"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "Use under MIT",
+                        Url = new Uri("https://opensource.org/licenses/MIT"),
+                    }
+                });
+
+
+                c.EnableAnnotations();
+
+
+
+              /*  c.OperationFilter<AddHeaderOperationFilter>("correlationId", "Correlation Id for the request", false);*/ // adds any string you like to the request headers - in this case, a correlation id
+                c.OperationFilter<AddResponseHeadersFilter>(); // [SwaggerResponseHeader]
+
+                //var filePath = Path.Combine(AppContext.BaseDirectory, "WebApi.xml");
+                //c.IncludeXmlComments(filePath); // standard Swashbuckle functionality, this needs to be before c.OperationFilter<AppendAuthorizeToSummaryOperationFilter>()
+
+                c.OperationFilter<AppendAuthorizeToSummaryOperationFilter>(); // Adds "(Auth)" to the summary so that you can see which endpoints have Authorization
+                                                                             
+                #region
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    //Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
+                    Description = " JWT Authorization header using the Bearer scheme. \r\n\r\n Put **_ONLY_** your JWT Bearer token on textbox below!"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                          new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            },
+                            new string[] {}
+                    }
+                });
+                #endregion
             });
 
+
+
+            services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
 
             //configure appdbcontext
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -50,10 +116,10 @@ namespace MudBlazorWithJwt.Server
 
             //configure identity
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-            { 
-            
-           
-           // options
+            {
+
+
+                // options
 
             }).AddEntityFrameworkStores<ApplicationDbContext>()
               .AddDefaultTokenProviders();
@@ -64,7 +130,8 @@ namespace MudBlazorWithJwt.Server
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options => {
+            }).AddJwtBearer(options =>
+            {
 
                 options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
@@ -87,7 +154,15 @@ namespace MudBlazorWithJwt.Server
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MudBlazorWithJwt.Server v1"));
+                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MudBlazorWithJwt.Server v1"));
+
+                app.UseSwaggerUI(c =>
+                {
+
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "MudBlazorWithJwt.Server v1");
+
+
+                });
 
                 app.UseWebAssemblyDebugging();
             }
