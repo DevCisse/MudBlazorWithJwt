@@ -9,6 +9,21 @@
 
 
 
+<br />
+<br />
+<br />
+@if (showErrorAlert)
+{
+    <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="(() => CloseMe(true))">
+
+        @foreach (var item in apiErrors)
+        {
+            <span>@item</span>
+        }
+    </MudAlert>
+}
+
+
 <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
 
     <MudText Typo="Typo.h4" GutterBottom="true">Sign Up</MudText>
@@ -47,6 +62,8 @@
     string ConfirmPassword { get; set; }
     public bool AgreeToTerms { get; set; }
 
+    private bool showCallAlert = false;
+    private bool showErrorAlert = false;
 
     private RegisterModel model = new RegisterModel();
 
@@ -57,6 +74,8 @@
     InputType PasswordInput = InputType.Password;
     string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
     MudTextField<string> pwField1;
+
+    List<string> apiErrors = new List<string>{ };
 
     void TogglePasswordVisibility()
     {
@@ -114,7 +133,7 @@
 
         var response = await HttpClient.PostAsJsonAsync("api/account/register/", model);
 
-        var registerResult =await response.Content.ReadFromJsonAsync<RegisterResult>();
+        var registerResult = await response.Content.ReadFromJsonAsync<RegisterResult>();
 
 
         if (registerResult.Successful)
@@ -124,14 +143,28 @@
         }
         else
         {
+            showErrorAlert = true;
             foreach (var item in registerResult.Errors)
             {
-                Console.WriteLine(item);
+                apiErrors.Add(item);
             }
         }
 
 
 
+
+    }
+
+    private void CloseMe(bool value)
+    {
+        if (value)
+        {
+            showErrorAlert = false;
+        }
+        else
+        {
+            showCallAlert = false;
+        }
     }
 
 
