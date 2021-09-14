@@ -14,18 +14,18 @@
     <MudText Typo="Typo.h4" GutterBottom="true">Sign Up</MudText>
     <MudText>Already have an account? <MudLink Href="/pages/authentication/login">Sign In</MudLink></MudText>
 
-    <MudTextField T="string" @bind-Value="Email" Required="true" RequiredError="Email is required!" Label="E-mail" Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" Variant=" Variant.Outlined"></MudTextField>
+    <MudTextField T="string" @bind-Value="model.FirstName" Required="true" RequiredError="First name is required!" Label="First Name " Variant=" Variant.Outlined" Class="mt-4"></MudTextField>
+    <MudTextField T="string" @bind-Value="model.LastName" Required="true" RequiredError="Last name is required!" Label="Last Name " Variant=" Variant.Outlined" Class="mt-4"></MudTextField>
+    <MudTextField T="string" @bind-Value="model.JobTitle" Required="true" RequiredError="Job title is required!" Label="Job Title " Variant=" Variant.Outlined" Class="mt-4"></MudTextField>
 
-    @*<MudTextField @bind-Value="@Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="TogglePasswordVisibility" Class="mt-4" />
+    <MudTextField T="string" @bind-Value="Email" Required="true" RequiredError="Email is required!" Label="E-mail " Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" Variant=" Variant.Outlined" Class="mt-4" Fo></MudTextField>
 
-        <MudTextField @bind-Value="@Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="TogglePasswordVisibility" Class="mt-4" />*@
-
-    <MudTextField T="string" Label="Password" @bind-Value="Password" Variant="Variant.Outlined" @ref="pwField1"
+    <MudTextField T="string" Label="Password " @bind-Value="Password" Variant="Variant.Outlined" @ref="pwField1"
                   InputType="InputType.Password"
                   Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
                   RequiredError="Password is required!" Class="mt-4" />
     <MudTextField T="string"
-                  Label="Enter password again" @bind-Value="ConfirmPassword" Variant="Variant.Outlined" InputType="InputType.Password"
+                  Label="Enter password again " @bind-Value="ConfirmPassword" Variant="Variant.Outlined" InputType="InputType.Password"
                   Validation="@(new Func<string, string>(PasswordMatch))" Class="mt-4" />
 
 
@@ -36,6 +36,10 @@
 
 @code {
 
+
+    string FirstName { get; set; }
+    string LastName { get; set; }
+    string JobTitle { get; set; }
     bool success = default;
     bool isBusy = default;
     string Password { get; set; }

@@ -1,14 +1,17 @@
-﻿<MudCard Elevation="0" Square="true" Class="@Class" Style="@Style">
-    <MudCardHeader>
-        <CardHeaderAvatar>
-            <MudAvatar Image="images/avatar_jonny.jpg" />
-        </CardHeaderAvatar>
-        <CardHeaderContent>
-            <MudText Typo="Typo.body2">Jonny Larsson</MudText>
-            <MudText Typo="Typo.caption">IT Consultant</MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-</MudCard>
+﻿<AuthorizeView>
+    <MudCard Elevation="0" Square="true" Class="@Class" Style="@Style">
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Image="images/avatar_jonny.jpg" />
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.body2"> @context.User.FindFirst("FirstName").Value @context.User.FindFirst("LastName").Value</MudText>
+                <MudText Typo="Typo.caption">@context.User.FindFirst("JobTitle").Value</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+    </MudCard>
+</AuthorizeView>
+
 
 @code {
     [Parameter] public string Class { get; set; }
